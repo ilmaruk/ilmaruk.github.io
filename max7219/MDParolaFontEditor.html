@@ -249,6 +249,10 @@
 						class="fas fa-text-width"></i> Fit</button>
 				<button type="button" @click="editorSave" class="btn btn-primary mb-2 mr-sm-2"><i
 						class="fas fa-save"></i> Save</button>
+				<button type="button" @click="editorCopy" class="btn btn-warning mb-2 mr-sm-2"><i
+						class="fas fa-copy"></i> Copy</button>
+				<button type="button" @click="editorPaste" class="btn btn-warning mb-2 mr-sm-2"><i
+						class="fas fa-paste"></i> Paste</button>
 				<button type="button" @click="editorClear" class="btn btn-danger mb-2 mr-sm-2"><i
 						class="fas fa-eraser"></i> Clear</button>
 				<div class="btn-group mb-2 mr-sm-2">
@@ -396,6 +400,7 @@
 					],
 					label: ""
 				},
+				buffer: [],
 				font: {
 					name: '',
 					chars: [],
@@ -482,6 +487,35 @@
 						if (!this.editor.char[i].cols.length) continue;
 						this.font.chars[index].cols = JSON.parse(JSON.stringify(this.editor.char[i].cols));
 						this.font.chars[index].label = JSON.parse(JSON.stringify(this.editor.char[i].label));
+					}
+				},
+				editorCopy() {
+					for (var i = 0; i < 2; i++) {
+						if (!this.editor.char[i].cols.length) continue;
+						this.buffer[i] = this.editor.char[i].index;
+					}
+					console.log(this.buffer);
+				},
+				editorPaste() {
+					var char = [];
+					char.push(this.font.chars[this.buffer[0]]);
+					if (this.font.double_height) char.unshift(this.font.chars[this.buffer[1]]);
+					// clear editor
+					for (var i = 0; i < 2; i++) {
+						this.editor.char[i].cols = [];
+						this.editor.char[i].label = '';
+					}
+					// load char(s)
+					for (var i = 0; i < char.length; i++) {
+						// "JSON.parse(JSON.stringify(char))" makes a shallow unlinked copy
+						if (char[i].cols.length) {
+							// edit the char
+							this.editor.char[i].cols = JSON.parse(JSON.stringify(char[i].cols));
+						} else {
+							// copy a default "empty" char
+							this.editor.char[i].cols = JSON.parse(JSON.stringify(this.empty_char.cols));
+						}
+						this.editor.char[i].label = JSON.parse(JSON.stringify(char[i].label));
 					}
 				},
 				editorAddCol() {
